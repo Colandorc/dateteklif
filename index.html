@@ -1,1 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Berfin Ada — Buluşalım mı?</title>
+<style>
+  :root{
+    --sky1:#ffb6b9; --sky2:#fdebd3; --sky3:#b8e1ff; /* günbatımı gökyüzü */
+    --mount1:#8ecae6; --mount2:#5fa8d3; --mount3:#3a86c7;
+    --field:#73c08a; --field2:#5cad74;
+    --yes:#ff6b9a; --no:#355070; --ink:#10223a;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    color:#fff; overflow:hidden;
+    display:grid; place-items:center;
+    background: linear-gradient(180deg, var(--sky1), var(--sky2) 45%, var(--sky3) 90%);
+  }
+
+  /* === SAHNE (arka plan manzara) === */
+  .scene{
+    position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+  }
+  /* Güneş */
+  .sun{
+    position:absolute; left:50%; top:10vh; transform:translateX(-50%);
+    width:180px; height:180px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #fff6, #fff0 60%),
+                #ffd07a;
+    filter: blur(1px) drop-shadow(0 20px 60px rgba(255,180,80,.5));
+    animation: sunFloat 12s ease-in-out infinite;
+  }
+  @keyframes sunFloat{ 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,10px)} }
+
+  /* Bulutlar */
+  .cloud{
+    position:absolute; top:12vh; width:240px; height:80px; opacity:.9; filter:blur(.3px);
+    background:
+      radial-gradient(closest-side, #fff, #fff0) -40px 10px/120px 80px no-repeat,
+      radial-gradient(closest-side, #fff, #fff0)   40px -6px/140px 90px no-repeat,
+      radial-gradient(closest-side, #fff, #fff0)  120px 16px/100px 70px no-repeat;
+    animation: drift 40s linear infinite;
+  }
+  .cloud.c2{ top:18vh; transform:scale(1.2); animation-duration: 55s; opacity:.8 }
+  .cloud.c3{ top:22vh; transform:scale(.9);  animation-duration: 48s; opacity:.75 }
+  @keyframes drift{ from{ left:-30vw } to{ left:110vw } }
+
+  /* Dağlar (parallax) */
+  .mount{ position:absolute; bottom:25vh; left:-10vw; right:-10vw; height:42vh; z-index:0; }
+  .m1{ background:
+        radial-gradient(120vh 60vh at 20% 100%, var(--mount1), transparent 70%),
+        radial-gradient(120vh 60vh at 70% 100%, var(--mount1), transparent 70%); opacity:.65 }
+  .m2{ bottom:22vh; background:
+        radial-gradient(120vh 60vh at 35% 100%, var(--mount2), transparent 70%),
+        radial-gradient(120vh 60vh at 85% 100%, var(--mount2), transparent 70%); opacity:.75 }
+  .m3{ bottom:20vh; background:
+        radial-gradient(120vh 60vh at 10% 100%, var(--mount3), transparent 70%),
+        radial-gradient(120vh 60vh at 60% 100%, var(--mount3), transparent 70%); opacity:.85 }
+
+  /* Çayır */
+  .field{
+    position:absolute; left:-5vw; right:-5vw; bottom:-2vh; height:28vh; z-index:1;
+    background: linear-gradient(180deg, var(--field) 0%, var(--field2) 60%, #2f9159 100%);
+    box-shadow: 0 -30px 80px rgba(0,0,0,.15) inset;
+  }
+
+  /* Çiçekler (SVG tekrar) */
+  .flowers{
+    position:absolute; bottom:3vh; left:0; right:0; height:22vh; z-index:2; pointer-events:none;
+  }
+  .flower{ position:absolute; bottom:0; width:26px; height:120px; transform-origin:50% 100%;
+           animation: sway 3.6s ease-in-out infinite; }
+  .flower:nth-child(odd){ animation-duration: 4.4s }
+  @keyframes sway{ 0%,100%{ transform:rotate(-2deg)} 50%{ transform:rotate(3deg)} }
+
+  /* === İÇERİK === */
+  .wrap{
+    position:relative; z-index:5; text-align:center;
+    width:min(92vw, 780px); padding:18px 14px 26px;
+    color:var(--ink);
+  }
+  h1{
+    color:#17304a; margin:0 0 10px;
+    font-size: clamp(22px, 4.6vw, 42px); font-weight:900;
+    text-shadow: 0 2px 0 #fff6;
+  }
+  h2{
+    margin:6px 0 14px; font-weight:700;
+    font-size: clamp(18px, 3.6vw, 28px);
+    color:#234766;
+  }
+
+  /* Karakter (kalp/papatya buketi) — görsel yok, SVG */
+  .mascot{
+    width:min(360px, 70vw); margin: 4px auto 10px;
+    filter: drop-shadow(0 18px 40px rgba(0,0,0,.3));
+    transform-origin:50% 60%;
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* Butonlar */
+  .actions{ display:flex; gap:16px; justify-content:center; margin-top:8px; flex-wrap:wrap }
+  button{
+    border:0; border-radius:18px; padding:14px 26px; font-weight:800; cursor:pointer;
+    font-size: clamp(16px, 3.4vw, 20px); transition: transform .15s ease, box-shadow .2s ease;
+    color:#fff; user-select:none;
+  }
+  #yes{ background:var(--yes); box-shadow:0 10px 26px rgba(255,107,154,.45) }
+  #yes:hover{ transform:translateY(-2px) scale(1.03) }
+  #no{  background:var(--no);  box-shadow:0 10px 26px rgba(20,30,60,.35) }
+
+  /* Kaçan "Hayır" sahne sınırı */
+  .no-stage{ position:relative; width:min(92vw,780px); height:0 } /* sadece konum ref */
+
+  /* Konfeti/havai fişek/petal katmanları */
+  canvas.fx{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:9 }
+
+  /* Bildirim kartı */
+  .toast{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(20px);
+          background:#ffffffee; color:#0e2236; padding:12px 16px; border-radius:14px;
+          font-weight:700; box-shadow:0 18px 50px rgba(0,0,0,.25); opacity:0;
+          transition:transform .25s ease, opacity .25s ease; z-index:10}
+  .toast.show{ transform:translateX(-50%) translateY(0); opacity:1 }
+</style>
+</head>
+<body>
+
+<!-- === MANZARA KATLARI === -->
+<div class="scene">
+  <div class="sun"></div>
+  <div class="cloud" style="left:-20vw"></div>
+  <div class="cloud c2" style="left:-50vw"></div>
+  <div class="cloud c3" style="left:-80vw"></div>
+
+  <div class="mount m1"></div>
+  <div class="mount m2"></div>
+  <div class="mount m3"></div>
+
+  <div class="field"></div>
+  <div class="flowers" id="flowers"></div>
+</div>
+
+<!-- === İÇERİK === -->
+<div class="wrap">
+  <h1>Berfin Ada 🌸</h1>
+  <h2>Benimle buluşmaya ne dersin?</h2>
+
+  <!-- Çizim karakter (SVG) -->
+  <svg class="mascot" viewBox="0 0 240 260" aria-hidden="true">
+    <!-- gövde -->
+    <defs>
+      <radialGradient id="gPink" cx="50%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#ffe3ec"/>
+        <stop offset="60%" stop-color="#ffc3d6"/>
+        <stop offset="100%" stop-color="#ff8fb3"/>
+      </radialGradient>
+      <radialGradient id="gCheek" cx="50%" cy="50%" r="60%">
+        <stop offset="0%" stop-color="#ffb4c7"/>
+        <stop offset="100%" stop-color="#ff85a6"/>
+      </radialGradient>
+      <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4aa86a"/><stop offset="100%" stop-color="#337a4b"/>
+      </linearGradient>
+    </defs>
+
+    <ellipse cx="120" cy="120" rx="70" ry="78" fill="url(#gPink)"/>
+    <circle cx="92" cy="112" r="8" fill="#1c2b40"/>
+    <circle cx="148" cy="112" r="8" fill="#1c2b40"/>
+    <circle cx="86" cy="128" r="6" fill="url(#gCheek)" opacity=".9"/>
+    <circle cx="154" cy="128" r="6" fill="url(#gCheek)" opacity=".9"/>
+    <path d="M105 140 Q120 152 135 140" fill="none" stroke="#1c2b40" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- elinde papatya buketi -->
+    <g transform="translate(120,170)">
+      <g transform="rotate(-12)">
+        <rect x="-3" y="0" width="6" height="40" rx="3" fill="url(#stem)"/>
+        <g transform="translate(0,0)">
+          <circle r="9" fill="#ffd166"/><!-- orta -->
+          <!-- taç yaprakları -->
+          <g fill="#fff">
+            <ellipse rx="4" ry="9" transform="rotate(0) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(30) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(60) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(90) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(120) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(150) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(180) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(210) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(240) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(270) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(300) translate(0,-13)"/>
+            <ellipse rx="4" ry="9" transform="rotate(330) translate(0,-13)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </svg>
+
+  <div class="actions">
+    <button id="yes">💖 Evet</button>
+    <div class="no-stage"><button id="no">🙈 Hayır</button></div>
+  </div>
+</div>
+
+<!-- Efekt katmanları -->
+<canvas class="fx" id="petals"></canvas>
+<canvas class="fx" id="fireworks"></canvas>
+
+<div class="toast" id="toast">Harika! Bir kahveyle başlayalım mı? ☕💐</div>
+
+<script>
+/* ============ ÇİÇEK TARLASI: rastgele sap + çiçek SVG ============ */
+(function makeFlowers(){
+  const host = document.getElementById('flowers');
+  const W = innerWidth;
+  const count = Math.min(36, Math.floor(W/40));
+  for(let i=0;i<count;i++){
+    const f = document.createElement('div');
+    f.className='flower';
+    f.style.left = (i/(count-1))*100 + '%';
+    f.style.animationDelay = (Math.random()*2)+'s';
+    f.innerHTML = `
+      <svg viewBox="0 0 20 120" width="26" height="120" aria-hidden="true">
+        <defs>
+          <linearGradient id="st${i}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3e995c"/><stop offset="100%" stop-color="#2f7b49"/>
+          </linearGradient>
+        </defs>
+        <rect x="9" y="18" width="2" height="92" fill="url(#st${i})" rx="1"/>
+        <ellipse cx="10" cy="18" rx="8" ry="6" fill="#fff"/>
+        <circle cx="10" cy="18" r="3.2" fill="#ffd166"/>
+      </svg>`;
+    host.appendChild(f);
+  }
+})();
+
+/* ============ "HAYIR" kaçma + küçülme, "EVET" büyüme ============ */
+const yesBtn = document.getElementById('yes');
+const noBtn  = document.getElementById('no');
+const toast  = document.getElementById('toast');
+
+let noScale=1, yesScale=1;
+function randomIn(min,max){ return Math.random()*(max-min)+min }
+function moveNo(){
+  // sahne sınırı: görünür alanın ortası civarı
+  const vw = innerWidth, vh = innerHeight;
+  const bw = noBtn.offsetWidth, bh = noBtn.offsetHeight;
+  const padX = Math.min(120, vw*0.2), padY = Math.min(140, vh*0.28);
+  const x = randomIn(padX, vw - padX - bw);
+  const y = randomIn(vh*0.46, vh - padY - bh);
+  noBtn.style.position='fixed';
+  noBtn.style.left = x+'px';
+  noBtn.style.top  = y+'px';
+}
+moveNo(); addEventListener('resize', moveNo);
+
+noBtn.addEventListener('mouseenter', moveNo);
+noBtn.addEventListener('click', ()=>{
+  noScale = Math.max(0.2, noScale * 0.86);
+  yesScale = Math.min(2.4, yesScale * 1.10);
+  noBtn.style.transform = `scale(${noScale})`;
+  yesBtn.style.transform = `scale(${yesScale})`;
+  moveNo();
+  if(noScale <= 0.22){
+    noBtn.style.opacity = '0';
+    setTimeout(()=>noBtn.remove(), 180);
+    showToast("O zaman 'Evet' diyelim mi? 😊");
+  }
+});
+
+/* ============ "EVET" — mesaj + havaî fişek + papatya yaprakları ============ */
+yesBtn.addEventListener('click', ()=>{
+  yesBtn.textContent = "Yaşasın! 🤍";
+  showToast("Teşekkür ederim Berfin Ada, seni seviyorum! 💙");
+  startFireworks(4200);
+  rainPetals(4200);
+});
+
+/* Toast */
+function showToast(text){
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 3000);
+}
+
+/* ============ PETAL (papatya yaprağı) YAĞMURU (canvas) ============ */
+const petCV = document.getElementById('petals');
+const petCtx = petCV.getContext('2d');
+function resizeCanvas(c, ctx){
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  c.width = innerWidth*dpr; c.height = innerHeight*dpr;
+  c.style.width = innerWidth+'px'; c.style.height = innerHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resizeCanvas(petCV, petCtx); addEventListener('resize', ()=>resizeCanvas(petCV, petCtx));
+
+let petals=[];
+function spawnPetal(){
+  const x = Math.random()*innerWidth, y = -20;
+  petals.push({
+    x, y, vx: randomIn(-0.6,0.6), vy: randomIn(1.2,2.2),
+    w: randomIn(6,10), h: randomIn(12,18),
+    rot: Math.random()*Math.PI, vr: randomIn(-0.02,0.02),
+    hue: randomIn(330,360) // pembe tonları
+  });
+}
+function drawPetals(){
+  petCtx.clearRect(0,0,innerWidth,innerHeight);
+  for(let i=petals.length-1;i>=0;i--){
+    const p = petals[i];
+    p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    petCtx.save();
+    petCtx.translate(p.x, p.y);
+    petCtx.rotate(p.rot);
+    petCtx.fillStyle = `hsla(${p.hue},100%,85%,.95)`;
+    // elips şeklinde yaprak
+    petCtx.beginPath();
+    petCtx.ellipse(0,0,p.w,p.h,0,0,Math.PI*2);
+    petCtx.fill();
+    petCtx.restore();
+    if(p.y > innerHeight+40) petals.splice(i,1);
+  }
+  requestAnimationFrame(drawPetals);
+}
+requestAnimationFrame(drawPetals);
+
+function rainPetals(ms=3000){
+  const t0 = performance.now();
+  const itv = setInterval(()=>{
+    for(let i=0;i<6;i++) spawnPetal();
+  }, 80);
+  setTimeout(()=>clearInterval(itv), ms);
+}
+
+/* ============ HAVAÎ FİŞEK (canvas) ============ */
+const fwCV = document.getElementById('fireworks');
+const fwCtx = fwCV.getContext('2d');
+function resizeFW(){ resizeCanvas(fwCV, fwCtx) }
+resizeFW(); addEventListener('resize', resizeFW);
+
+let fwParts=[];
+function fireworkAt(x,y){
+  const N=90, hue = Math.floor(Math.random()*360);
+  for(let i=0;i<N;i++){
+    const ang = Math.random()*Math.PI*2;
+    const spd = randomIn(2.2,5.0);
+    fwParts.push({
+      x,y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd - randomIn(.4,1.0),
+      r: randomIn(1.6,3.2), a:1,
+      col: `hsl(${(hue+randomIn(-20,20))|0},100%,60%)`
+    });
+  }
+}
+function startFireworks(ms=3500){
+  const t0 = performance.now();
+  const timer = setInterval(()=>{
+    fireworkAt(randomIn(0,innerWidth), randomIn(0, innerHeight*0.7));
+  }, 260);
+  setTimeout(()=>clearInterval(timer), ms);
+}
+function drawFW(){
+  fwCtx.clearRect(0,0,innerWidth,innerHeight);
+  for(let i=fwParts.length-1;i>=0;i--){
+    const p = fwParts[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.11; p.vx *= 0.992; p.vy *= 0.992; p.a -= 0.012;
+    if(p.a<=0 || p.y>innerHeight+40){ fwParts.splice(i,1); continue; }
+    fwCtx.globalCompositeOperation='lighter';
+    fwCtx.globalAlpha=Math.max(0,p.a);
+    fwCtx.fillStyle=p.col;
+    fwCtx.beginPath(); fwCtx.arc(p.x,p.y,p.r,0,Math.PI*2); fwCtx.fill();
+    fwCtx.globalCompositeOperation='source-over'; fwCtx.globalAlpha=1;
+  }
+  requestAnimationFrame(drawFW);
+}
+requestAnimationFrame(drawFW);
+</script>
+</body>
+</html>
 
