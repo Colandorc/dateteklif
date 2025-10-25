@@ -53,7 +53,7 @@
     transform: scale(1.1);
   }
 
-  #evet { transition: transform 2s ease; }
+  #evet, #hayir { transition: all 1s ease; }
 
   .moon {
     position: fixed;
@@ -77,32 +77,14 @@
     background: radial-gradient(circle at 30% 30%, #000010 0%, #000010 70%);
   }
 
-  .star {
-    position: absolute;
-    background: white;
-    border-radius: 50%;
-    opacity: 0.8;
-    animation: twinkle 3s infinite ease-in-out;
-  }
-
-  @keyframes twinkle {
-    0%,100%{opacity:0.3;}
-    50%{opacity:1;}
-  }
-
-  .shooting-star {
-    position: absolute;
-    width: 120px;
-    height: 2px;
-    background: linear-gradient(90deg, white, transparent);
-    opacity: 0.7;
-    animation: shoot 3.5s linear forwards;
-  }
-
-  @keyframes shoot {
-    0% { transform: translateX(-150px) translateY(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translateX(120vw) translateY(40vh); opacity: 0; }
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
   }
 
   .flower {
@@ -132,10 +114,10 @@
   }
 
   #message {
-    margin-top: 20px;
-    font-size: 1.2rem;
+    margin-top: 25px;
+    font-size: 1.3rem;
     opacity: 0;
-    transition: opacity 1s;
+    transition: opacity 2s;
   }
 </style>
 </head>
@@ -150,30 +132,104 @@
 
 <div id="message"></div>
 <div class="moon"></div>
+<canvas id="sky"></canvas>
 
 <script>
+  const canvas = document.getElementById('sky');
+  const ctx = canvas.getContext('2d');
+  let w, h, stars = [], shooting = [], fireworks = [];
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
   // yıldızlar
-  for (let i = 0; i < 120; i++) {
-    const star = document.createElement("div");
-    star.classList.add("star");
-    const size = Math.random() * 2 + 1 + "px";
-    star.style.width = size;
-    star.style.height = size;
-    star.style.top = Math.random() * 100 + "%";
-    star.style.left = Math.random() * 100 + "%";
-    star.style.animationDelay = Math.random() * 3 + "s";
-    document.body.appendChild(star);
+  for(let i=0;i<200;i++){
+    stars.push({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      size: Math.random()*2,
+      alpha: Math.random(),
+      speed: 0.03 + Math.random()*0.05
+    });
   }
 
-  // saniyede 5-6 kayan yıldız
-  setInterval(() => {
-    const s = document.createElement("div");
-    s.classList.add("shooting-star");
-    s.style.top = Math.random() * window.innerHeight * 0.5 + "px";
-    s.style.left = Math.random() * window.innerWidth * 0.3 + "px";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 4000);
-  }, 200);
+  // kayan yıldızlar
+  function spawnShootingStar(){
+    shooting.push({
+      x: Math.random()*w*0.6,
+      y: Math.random()*h*0.4,
+      len: 150+Math.random()*100,
+      speed: 8+Math.random()*4,
+      life: 0
+    });
+  }
+  setInterval(spawnShootingStar, 2500);
+
+  // havai fişek patlaması
+  function createFirework(x, y){
+    for(let i=0;i<60;i++){
+      fireworks.push({
+        x, y,
+        angle: Math.random()*2*Math.PI,
+        speed: Math.random()*5+2,
+        alpha: 1,
+        color: `hsl(${Math.random()*360},100%,60%)`
+      });
+    }
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,w,h);
+
+    // yıldızlar
+    for(let s of stars){
+      s.y += s.speed;
+      if(s.y>h) s.y=0;
+      s.alpha += (Math.random()-0.5)*0.05;
+      s.alpha = Math.max(0.2, Math.min(1,s.alpha));
+      ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // kayan yıldız
+    for(let i=shooting.length-1;i>=0;i--){
+      let s = shooting[i];
+      s.x += s.speed;
+      s.y += s.speed*0.3;
+      s.life++;
+      ctx.strokeStyle = "rgba(255,255,255,0.8)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x - s.len, s.y - s.len*0.3);
+      ctx.stroke();
+      if(s.life>100) shooting.splice(i,1);
+    }
+
+    // havai fişek partikülleri
+    for(let i=fireworks.length-1;i>=0;i--){
+      let f = fireworks[i];
+      f.x += Math.cos(f.angle)*f.speed;
+      f.y += Math.sin(f.angle)*f.speed + 0.3;
+      f.speed *= 0.97;
+      f.alpha -= 0.015;
+      ctx.fillStyle = f.color;
+      ctx.globalAlpha = f.alpha;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, 3, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      if(f.alpha<=0) fireworks.splice(i,1);
+    }
+
+    requestAnimationFrame(animate);
+  }
+  animate();
 
   // çiçekler
   for (let i = 0; i < 20; i++) {
@@ -183,7 +239,6 @@
     flower.style.height = 40 + Math.random() * 40 + "px";
     flower.style.bottom = "0";
     flower.style.animationDelay = Math.random() * 5 + "s";
-
     for (let j = 0; j < 4; j++) {
       const petal = document.createElement("div");
       petal.classList.add("petal");
@@ -205,10 +260,16 @@
     setTimeout(() => { msg.style.opacity = 0; }, 5000);
   });
 
-  evet.addEventListener("click", () => {
-    evet.style.transform = "scale(1.6)";
-    msg.innerText = "Harika! 🌟";
+  evet.addEventListener("click", (e) => {
+    evet.style.opacity = 0;
+    msg.innerText = "Teşekkür ederim 💫 Çok güzel olacak.";
     msg.style.opacity = 1;
+    // birkaç fişek patlat
+    for(let i=0;i<5;i++){
+      setTimeout(()=>{
+        createFirework(Math.random()*w, Math.random()*h*0.5);
+      }, i*600);
+    }
   });
 </script>
 
