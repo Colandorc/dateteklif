@@ -20,15 +20,24 @@
   }
 
   h1 {
-    font-size: 2rem;
-    margin-bottom: 30px;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
     animation: fadeIn 2s ease-in-out;
     text-shadow: 0 0 15px rgba(255,255,255,0.8);
     z-index: 5;
   }
 
+  .question {
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+    text-align: center;
+    animation: fadeIn 2.5s ease-in-out;
+    text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    z-index: 5;
+  }
+
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-15px); }
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -87,7 +96,7 @@
     width: 100vw;
     height: 100vh;
     pointer-events: none;
-    z-index: 1; /* arka plan en altta olacak ama her yerde görünür */
+    z-index: 1;
   }
 
   .flower {
@@ -129,6 +138,8 @@
 <body>
 
 <h1>Merhaba Melek 🌙</h1>
+
+<div class="question">Bu akşam benimle kahve eşliğinde tatlı yer misin? ☕🍰</div>
 
 <div class="buttons">
   <button id="evet">Evet 💖</button>
@@ -189,7 +200,7 @@
   function animate(){
     ctx.clearRect(0,0,w,h);
 
-    // arka plan parıltısı (çok hafif mavi ton)
+    // arka plan parıltısı
     let gradient = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, h/1.2);
     gradient.addColorStop(0, "rgba(0,10,30,0.5)");
     gradient.addColorStop(1, "rgba(0,0,0,0.8)");
@@ -279,7 +290,6 @@
     evet.style.opacity = 0;
     msg.innerText = "Teşekkür ederim 💫 Çok güzel olacak.";
     msg.style.opacity = 1;
-    // birkaç fişek patlat
     for(let i=0;i<6;i++){
       setTimeout(()=>{
         createFirework(Math.random()*w, Math.random()*h*0.5);
