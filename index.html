@@ -1,115 +1,224 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gece Gökyüzü</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100%;
-      background: radial-gradient(circle at bottom, #00111a 0%, #000010 100%);
-      font-family: sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kahve Teklifi</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background: radial-gradient(circle at bottom, #00111a 0%, #000010 100%);
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
 
-    /* Yıldızlar */
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: twinkle 3s infinite ease-in-out;
-    }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 40px;
+    text-align: center;
+    animation: fadeIn 2s ease-in-out;
+  }
 
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    /* Kayan yıldız */
-    .shooting-star {
-      position: absolute;
-      width: 100px;
-      height: 2px;
-      background: linear-gradient(90deg, white, transparent);
-      opacity: 0.7;
-      animation: shoot 6s linear infinite;
-    }
+  .buttons {
+    display: flex;
+    gap: 20px;
+    position: relative;
+  }
 
-    @keyframes shoot {
-      0% {
-        transform: translateX(-200px) translateY(0);
-        opacity: 0;
-      }
-      20% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateX(120vw) translateY(40vh);
-        opacity: 0;
-      }
-    }
+  button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid white;
+    color: white;
+    padding: 10px 30px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
 
-    /* Hilal */
-    .moon {
-      position: absolute;
-      top: 10%;
-      right: 15%;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      box-shadow: -15px 0 0 0 #fff;
-      background: #000010;
-    }
+  button:hover {
+    background: rgba(255,255,255,0.4);
+  }
 
-    /* Çiçek zemin */
-    .flowers {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 180px;
-      background: url('https://i.ibb.co/kQ1HKkS/flowers.png') repeat-x;
-      background-size: contain;
-      animation: sway 6s ease-in-out infinite alternate;
-    }
+  .moon {
+    position: absolute;
+    top: 10%;
+    right: 15%;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: -15px 0 0 0 #fff;
+    background: #000010;
+  }
 
-    @keyframes sway {
-      0% { transform: translateX(0px); }
-      100% { transform: translateX(-20px); }
-    }
+  .flowers {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 180px;
+    background: url('https://i.ibb.co/kQ1HKkS/flowers.png') repeat-x;
+    background-size: contain;
+    animation: sway 6s ease-in-out infinite alternate;
+  }
 
-  </style>
+  @keyframes sway {
+    0% { transform: translateX(0px); }
+    100% { transform: translateX(-20px); }
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: twinkle 3s infinite ease-in-out;
+  }
+
+  @keyframes twinkle {
+    0%,100%{opacity:0.3;}
+    50%{opacity:1;}
+  }
+
+  .shooting-star {
+    position: absolute;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, white, transparent);
+    opacity: 0.7;
+    animation: shoot 6s linear infinite;
+  }
+
+  @keyframes shoot {
+    0% {
+      transform: translateX(-200px) translateY(0);
+      opacity: 0;
+    }
+    20% { opacity: 1; }
+    100% {
+      transform: translateX(120vw) translateY(40vh);
+      opacity: 0;
+    }
+  }
+
+  #message {
+    margin-top: 30px;
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+</style>
 </head>
 <body>
-  <div class="moon"></div>
-  <div class="flowers"></div>
 
-  <script>
-    // Yıldız oluşturma
-    for (let i = 0; i < 150; i++) {
-      const star = document.createElement("div");
-      star.classList.add("star");
-      const size = Math.random() * 2 + 1 + "px";
-      star.style.width = size;
-      star.style.height = size;
-      star.style.top = Math.random() * 100 + "%";
-      star.style.left = Math.random() * 100 + "%";
-      star.style.animationDelay = Math.random() * 3 + "s";
-      document.body.appendChild(star);
+<h1>Akşam bir kahve içmeye ne dersin ☕🌙</h1>
+
+<div class="buttons">
+  <button id="evet">Evet</button>
+  <button id="hayir">Hayır</button>
+</div>
+
+<div id="message"></div>
+<div class="moon"></div>
+<div class="flowers"></div>
+<canvas id="fireworks"></canvas>
+
+<script>
+  // yıldızlar
+  for (let i = 0; i < 150; i++) {
+    const star = document.createElement("div");
+    star.classList.add("star");
+    const size = Math.random() * 2 + 1 + "px";
+    star.style.width = size;
+    star.style.height = size;
+    star.style.top = Math.random() * 100 + "%";
+    star.style.left = Math.random() * 100 + "%";
+    star.style.animationDelay = Math.random() * 3 + "s";
+    document.body.appendChild(star);
+  }
+
+  // kayan yıldızlar
+  setInterval(() => {
+    const s = document.createElement("div");
+    s.classList.add("shooting-star");
+    s.style.top = Math.random() * window.innerHeight * 0.5 + "px";
+    s.style.left = Math.random() * window.innerWidth * 0.5 + "px";
+    s.style.animationDuration = (4 + Math.random() * 3) + "s";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 7000);
+  }, 1000);
+
+  const evet = document.getElementById("evet");
+  const hayir = document.getElementById("hayir");
+  const msg = document.getElementById("message");
+
+  hayir.addEventListener("click", () => {
+    hayir.style.display = "none";
+    msg.innerText = "Öyle bir seçenek yok 😄 Diğerini değerlendirebilirsin.";
+    msg.style.opacity = 1;
+    setTimeout(() => { msg.style.opacity = 0; }, 5000);
+  });
+
+  evet.addEventListener("click", () => {
+    msg.innerText = "Harika! 🌟";
+    msg.style.opacity = 1;
+    startFireworks();
+  });
+
+  // Havai fişek efekti
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  function startFireworks() {
+    const particles = [];
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: window.innerWidth/2,
+        y: window.innerHeight/2,
+        angle: Math.random()*2*Math.PI,
+        speed: Math.random()*6+2,
+        radius: Math.random()*2+1,
+        life: 100
+      });
     }
 
-    // Kayan yıldız oluşturma
-    setInterval(() => {
-      const s = document.createElement("div");
-      s.classList.add("shooting-star");
-      s.style.top = Math.random() * window.innerHeight * 0.5 + "px";
-      s.style.left = Math.random() * window.innerWidth * 0.5 + "px";
-      s.style.animationDuration = (4 + Math.random() * 3) + "s";
-      document.body.appendChild(s);
-      setTimeout(() => s.remove(), 7000);
-    }, 2500);
-  </script>
+    function animate() {
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p => {
+        p.x += Math.cos(p.angle)*p.speed;
+        p.y += Math.sin(p.angle)*p.speed;
+        p.life--;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+        ctx.fillStyle = `hsl(${Math.random()*360},100%,60%)`;
+        ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+</script>
+
 </body>
 </html>
