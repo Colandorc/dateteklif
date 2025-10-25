@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>melek — bu akşam kahve?</title>
+<title>melek — akşam kahve?</title>
 <meta name="theme-color" content="#0a1320" />
 <style>
   :root{
@@ -19,12 +19,21 @@
     overflow:hidden;
   }
 
-  /* Gökyüzü: yıldızlar + kayan yıldızlar */
-  .sky{position:fixed; inset:0; z-index:-2; overflow:hidden}
+  /* Gökyüzü: yıldızlar + yavaş drift + ara sıra kayan yıldız */
+  .sky{
+    position:fixed; inset:0; z-index:-2; overflow:hidden;
+    animation: drift 60s linear infinite alternate;
+    will-change: transform;
+  }
+  @keyframes drift{
+    0%{ transform:translate3d(0,0,0) }
+    100%{ transform:translate3d(-3vw, 2vh, 0) }
+  }
   .star{
     position:absolute; width:2px; height:2px; border-radius:50%;
     background:#fff; opacity:.8; filter:drop-shadow(0 0 3px #fff);
     animation: twinkle 2.4s ease-in-out infinite;
+    will-change: opacity, transform;
   }
   @keyframes twinkle{
     0%,100%{opacity:.25; transform:scale(.9)}
@@ -34,6 +43,7 @@
     position:absolute; width:2px; height:2px; border-radius:50%;
     background:#fff; box-shadow:0 0 6px 2px #fff;
     animation: shoot 1.8s linear forwards;
+    will-change: transform, opacity;
   }
   @keyframes shoot{
     0%{opacity:0; transform:translate3d(0,0,0) scale(1)}
@@ -51,9 +61,9 @@
   .sway2{ animation: sway 6.2s ease-in-out infinite; transform-origin:bottom center; }
   .sway3{ animation: sway 7.1s ease-in-out infinite; transform-origin:bottom center; }
   @keyframes sway{
-    0%{ transform:rotate(-1.4deg) }
-    50%{ transform:rotate(1.4deg) }
-    100%{ transform:rotate(-1.4deg) }
+    0%{ transform:rotate(-1.3deg) }
+    50%{ transform:rotate(1.3deg) }
+    100%{ transform:rotate(-1.3deg) }
   }
   .ground{
     position:fixed; left:0; right:0; bottom:0; height:18vh; z-index:-1;
@@ -102,16 +112,16 @@
   .yes{ background:linear-gradient(180deg, #79f5b4, #2eea8a); }
   .no { background:linear-gradient(180deg, #ffb3b3, #ff7272); color:#1c0d0d; }
 
-  /* Evet büyüme efekti */
+  /* Evet: hafif büyüme (ekranı kaplamaz) */
   .grow{
-    animation: yesGrow 7s ease-in-out forwards;
+    animation: yesGrowLite 6.5s ease-in-out forwards;
     transform-origin:center center;
     z-index:3;
   }
-  @keyframes yesGrow{
+  @keyframes yesGrowLite{
     0% { transform:scale(1); }
-    40%{ transform:scale(1.35); }
-    100%{ transform:scale(18); }
+    40%{ transform:scale(1.25); }
+    100%{ transform:scale(1.9); } /* ekranı kaplamaz */
   }
 
   .vanish{
@@ -121,13 +131,13 @@
   .note{
     margin-top:clamp(12px, 2.6vw, 18px);
     font-size:clamp(13px, 3vw, 16px);
-    opacity:.85;
+    opacity:.9;
   }
 
   /* Konfeti tuvali */
   canvas#fx{ position:fixed; inset:0; pointer-events:none; z-index:5; }
 
-  /* Mobil düzen */
+  /* Mobil performans: düğmeler dikeyleşsin */
   @media (max-width:560px){
     .actions{ flex-direction:column; }
     .btn{ width:min(320px, 92vw); justify-content:center; }
@@ -156,7 +166,7 @@
   <!-- Çiçek tarlası (SVG) -->
   <div class="flowers" aria-hidden="true">
     <svg viewBox="0 0 1000 300" preserveAspectRatio="none">
-      <!-- saplar -->
+      <!-- saplar + çiçekler -->
       <g class="sway" opacity=".9">
         <path d="M80 300 C90 220, 95 160, 100 110" stroke="#2a6a4b" stroke-width="4" fill="none"/>
         <circle cx="100" cy="110" r="10" fill="#ffb2d6"/>
@@ -206,9 +216,12 @@
   <div class="ground"></div>
 
 <script>
-/* ---------------- YILDIZLAR ---------------- */
+/* ---------------- YILDIZLAR (performans dostu) ---------------- */
 const sky = document.getElementById('sky');
-function makeStars(count=140){
+let STAR_COUNT = 140;
+if (matchMedia('(max-width: 560px)').matches) STAR_COUNT = 90; // mobilde azalt
+
+function makeStars(count=STAR_COUNT){
   const vw = innerWidth, vh = innerHeight;
   sky.innerHTML = '';
   for(let i=0;i<count;i++){
@@ -221,9 +234,11 @@ function makeStars(count=140){
     sky.appendChild(s);
   }
 }
-makeStars(160);
+makeStars();
 
 function shootStar(){
+  // ara sıra kayan yıldız; mobilde frekans daha düşük
+  if (matchMedia('(max-width: 560px)').matches && Math.random()<0.6) return;
   const s = document.createElement('div');
   s.className='shoot';
   const vw = innerWidth, vh = innerHeight;
@@ -232,19 +247,19 @@ function shootStar(){
   sky.appendChild(s);
   setTimeout(()=>s.remove(), 1800);
 }
-// daha çok ama yumuşak kayan yıldız
-setInterval(()=>{ if(Math.random()<0.55) shootStar(); }, 1800);
-addEventListener('resize', ()=>makeStars(160));
+// daha çok ama yumuşak kayan yıldız etkisi
+setInterval(()=>{ if(Math.random()<0.5) shootStar(); }, 1900);
+addEventListener('resize', ()=>makeStars());
 
 /* ---------------- BUTON AKIŞI ---------------- */
 const btnYes = document.getElementById('yes');
 const btnNo  = document.getElementById('no');
 const msg    = document.getElementById('msg');
 
-// 3.5sn sonra hayır kaybolsun, evet büyümeye başlasın
+// 3.5sn sonra hayır kaybolsun, evet hafif büyüsün
 setTimeout(()=>{
   btnNo.classList.add('vanish');
-  btnYes.classList.add('grow');
+  btnYes.classList.add('grow'); // hafif büyüme (ekranı kaplamaz)
 }, 3500);
 
 // Evet tıklanınca kutlama + mesaj
@@ -253,9 +268,9 @@ btnYes.addEventListener('click', ()=>{
   msg.textContent = "Teşekkür ederim, seni seviyorum 💖";
 });
 
-/* ---------------- BASİT KONFETİ ---------------- */
+/* ---------------- HAFİF KONFETİ (mobil dostu) ---------------- */
 const canvas = document.getElementById('fx');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: true });
 let W = canvas.width = innerWidth;
 let H = canvas.height = innerHeight;
 addEventListener('resize', ()=>{ W=canvas.width=innerWidth; H=canvas.height=innerHeight; });
@@ -263,15 +278,16 @@ addEventListener('resize', ()=>{ W=canvas.width=innerWidth; H=canvas.height=inne
 let parts = [];
 function celebrate(){
   const colors = ['#ff9aa8','#ffd28a','#9ad0ff','#bda0ff','#8cf5c4','#fff57a'];
-  for(let i=0;i<160;i++){
+  const base = matchMedia('(max-width: 560px)').matches ? 80 : 140; // mobilde azalt
+  for(let i=0;i<base;i++){
     parts.push({
       x: W/2, y: H*0.36,
-      vx: (Math.random()*2-1)*6,
-      vy: -Math.random()*8-6,
-      g: 0.22 + Math.random()*0.18,
-      size: 3 + Math.random()*5,
+      vx: (Math.random()*2-1)*5.5,
+      vy: -Math.random()*7-6,
+      g: 0.22 + Math.random()*0.16,
+      size: 3 + Math.random()*4.5,
       color: colors[Math.floor(Math.random()*colors.length)],
-      life: 120+Math.random()*60
+      life: 110+Math.random()*60
     });
   }
 }
