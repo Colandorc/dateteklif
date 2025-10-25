@@ -3,170 +3,90 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>melek — akşam kahve?</title>
+<title>Melek — Kahve Daveti ☕</title>
 <meta name="theme-color" content="#0a1320" />
 <style>
   :root{
-    --bg1:#0a1320; --bg2:#0f1d33;
-    --txt:#eaf2ff; --accent:#ffd7a8; --yes:#2eea8a; --no:#ff7272;
+    --bg1:#0a1320; --bg2:#0f1d33; --txt:#eaf2ff;
+    --yes1:#79f5b4; --yes2:#2eea8a; --no1:#ff9a9a; --no2:#ff7272;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
   body{
-    font-family: ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     background: radial-gradient(1200px 800px at 60% 10%, #132446 0%, #0f1d33 55%, #0a1320 100%), var(--bg1);
-    color:var(--txt);
-    overflow:hidden;
+    color:var(--txt); font-family: ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    overflow:hidden; display:flex; align-items:center; justify-content:center; padding:16px;
   }
 
-  /* Gökyüzü: yıldızlar + yavaş drift + ara sıra kayan yıldız */
-  .sky{
-    position:fixed; inset:0; z-index:-2; overflow:hidden;
-    animation: drift 60s linear infinite alternate;
-    will-change: transform;
-  }
-  @keyframes drift{
-    0%{ transform:translate3d(0,0,0) }
-    100%{ transform:translate3d(-3vw, 2vh, 0) }
-  }
-  .star{
-    position:absolute; width:2px; height:2px; border-radius:50%;
-    background:#fff; opacity:.8; filter:drop-shadow(0 0 3px #fff);
-    animation: twinkle 2.4s ease-in-out infinite;
-    will-change: opacity, transform;
-  }
-  @keyframes twinkle{
-    0%,100%{opacity:.25; transform:scale(.9)}
-    50%{opacity:1; transform:scale(1)}
-  }
-  .shoot{
-    position:absolute; width:2px; height:2px; border-radius:50%;
-    background:#fff; box-shadow:0 0 6px 2px #fff;
-    animation: shoot 1.8s linear forwards;
-    will-change: transform, opacity;
-  }
-  @keyframes shoot{
-    0%{opacity:0; transform:translate3d(0,0,0) scale(1)}
-    10%{opacity:1}
-    100%{opacity:0; transform:translate3d(-60vw, 45vh, 0) scale(.9)}
-  }
-
-  /* Çiçek tarlası: altta hafif rüzgâr */
-  .flowers{
-    position:fixed; left:0; right:0; bottom:-6vh; height:38vh; z-index:-1;
-    pointer-events:none;
-  }
-  .flowers svg{width:120%; height:100%; transform:translateX(-10%);}
-  .sway { animation: sway 5.5s ease-in-out infinite; transform-origin:bottom center; }
-  .sway2{ animation: sway 6.2s ease-in-out infinite; transform-origin:bottom center; }
-  .sway3{ animation: sway 7.1s ease-in-out infinite; transform-origin:bottom center; }
-  @keyframes sway{
-    0%{ transform:rotate(-1.3deg) }
-    50%{ transform:rotate(1.3deg) }
-    100%{ transform:rotate(-1.3deg) }
-  }
-  .ground{
-    position:fixed; left:0; right:0; bottom:0; height:18vh; z-index:-1;
-    background: linear-gradient(180deg, rgba(22,39,30,.0), rgba(22,39,30,.55) 35%, rgba(10,22,16,.9));
-    filter: blur(1px);
-  }
-
-  .wrap{min-height:100%; display:grid; place-items:center; padding:clamp(16px,3vw,40px);}
+  /* Gökyüzü (yıldızlar + yavaş drift) */
+  canvas#sky{ position:fixed; inset:0; z-index:-2; }
+  .wrap{ width:min(920px, 96vw); }
   .card{
-    width:min(940px, 92vw);
+    padding:clamp(18px,3.5vw,40px);
     border-radius:28px;
-    padding:clamp(18px,3.5vw,42px);
     background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
     border:1px solid rgba(255,255,255,.10);
-    box-shadow:0 18px 60px rgba(0,0,0,.35);
     backdrop-filter: blur(6px) saturate(120%);
+    box-shadow:0 18px 60px rgba(0,0,0,.35);
     text-align:center;
   }
-
-  h1{
-    margin:0 0 .4rem; font-weight:900;
-    font-size:clamp(22px, 5.2vw, 44px);
-    letter-spacing:.3px;
-  }
-  .sub{
-    font-size:clamp(14px, 3.2vw, 18px);
-    opacity:.92; margin-bottom:clamp(16px,3.2vw,24px);
-  }
+  h1{ margin:0 0 10px; font-weight:900; font-size:clamp(22px, 5.6vw, 42px); }
+  .sub{ opacity:.9; font-size:clamp(14px,3.2vw,18px); margin-bottom:18px; }
 
   .actions{
-    display:flex; gap:clamp(12px, 3.2vw, 24px);
-    justify-content:center; align-items:center; flex-wrap:wrap;
-    margin-top:clamp(12px,3vw,18px);
+    display:flex; gap:clamp(12px,3.2vw,24px); justify-content:center; flex-wrap:wrap; margin-top:12px;
   }
   .btn{
     appearance:none; border:0; cursor:pointer; user-select:none;
-    border-radius:16px; padding:clamp(14px, 2.8vw, 20px) clamp(22px, 5vw, 36px);
-    font-weight:800; letter-spacing:.3px;
-    font-size:clamp(16px, 4vw, 20px);
-    color:#06111a;
+    border-radius:16px; padding:clamp(14px,2.8vw,18px) clamp(22px,5vw,34px);
+    font-weight:800; letter-spacing:.2px; font-size:clamp(16px,4vw,20px);
     box-shadow:0 10px 24px rgba(0,0,0,.25), inset 0 -6px 0 rgba(0,0,0,.08);
-    transition:transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s, opacity .35s;
-    display:inline-flex; align-items:center; gap:.6em; will-change:transform;
+    transition:transform .25s cubic-bezier(.2,.8,.2,1), opacity .35s;
+    display:inline-flex; align-items:center; gap:.6em; color:#06111a;
   }
   .btn:active{ transform:translateY(1px) scale(.98) }
-  .yes{ background:linear-gradient(180deg, #79f5b4, #2eea8a); }
-  .no { background:linear-gradient(180deg, #ffb3b3, #ff7272); color:#1c0d0d; }
+  #yes{ background:linear-gradient(180deg, var(--yes1), var(--yes2)); }
+  #no { background:linear-gradient(180deg, var(--no1),  var(--no2));  color:#230c0c; }
 
-  /* Evet: hafif büyüme (ekranı kaplamaz) */
-  .grow{
-    animation: yesGrowLite 6.5s ease-in-out forwards;
-    transform-origin:center center;
-    z-index:3;
+  #msg{
+    margin-top:14px; min-height:1.6em;
+    font-size:clamp(13px,3vw,16px); opacity:0; transition:opacity .4s ease;
   }
-  @keyframes yesGrowLite{
-    0% { transform:scale(1); }
-    40%{ transform:scale(1.25); }
-    100%{ transform:scale(1.9); } /* ekranı kaplamaz */
-  }
+  .show{ opacity:1 !important; }
 
-  .vanish{
-    pointer-events:none; opacity:0; transform:scale(.6); transition:opacity .45s ease, transform .45s ease;
-  }
-
-  .note{
-    margin-top:clamp(12px, 2.6vw, 18px);
-    font-size:clamp(13px, 3vw, 16px);
-    opacity:.9;
-  }
+  /* Altta çiçekli zemin (hafif sallanma, çok hafif) */
+  .flowers{ position:fixed; left:0; right:0; bottom:-6vh; height:34vh; z-index:-1; pointer-events:none; }
+  .flowers svg{ width:120%; height:100%; transform:translateX(-10%); }
+  .sway { animation:sway 6s ease-in-out infinite; transform-origin:bottom center; }
+  .sway2{ animation:sway 7s ease-in-out infinite; transform-origin:bottom center; }
+  .sway3{ animation:sway 8s ease-in-out infinite; transform-origin:bottom center; }
+  @keyframes sway{ 0%{transform:rotate(-1.2deg)} 50%{transform:rotate(1.2deg)} 100%{transform:rotate(-1.2deg)} }
 
   /* Konfeti tuvali */
-  canvas#fx{ position:fixed; inset:0; pointer-events:none; z-index:5; }
+  canvas#fx{ position:fixed; inset:0; z-index:5; pointer-events:none; }
 
-  /* Mobil performans: düğmeler dikeyleşsin */
-  @media (max-width:560px){
-    .actions{ flex-direction:column; }
-    .btn{ width:min(320px, 92vw); justify-content:center; }
-  }
+  @media (max-width:560px){ .actions{ flex-direction:column; } .btn{ width:min(320px,92vw); justify-content:center; } }
 </style>
 </head>
 <body>
-  <!-- Gökyüzü -->
-  <div class="sky" id="sky"></div>
+  <canvas id="sky"></canvas>
   <canvas id="fx"></canvas>
 
   <div class="wrap">
     <section class="card">
       <div class="sub">Melek’e bir soru ✨</div>
-      <h1>Melek, bu akşam benimle <em>kahve</em> içer misin?</h1>
-
+      <h1>Melek, bu akşam benimle kahve içer misin?</h1>
       <div class="actions">
-        <button id="yes" class="btn yes">☕ Evet</button>
-        <button id="no"  class="btn no">🙈 Hayır</button>
+        <button id="yes" class="btn">☕ Evet</button>
+        <button id="no"  class="btn">🙈 Hayır</button>
       </div>
-
-      <div class="note" id="msg"></div>
+      <div id="msg"></div>
     </section>
   </div>
 
-  <!-- Çiçek tarlası (SVG) -->
+  <!-- Çiçekler -->
   <div class="flowers" aria-hidden="true">
     <svg viewBox="0 0 1000 300" preserveAspectRatio="none">
-      <!-- saplar + çiçekler -->
       <g class="sway" opacity=".9">
         <path d="M80 300 C90 220, 95 160, 100 110" stroke="#2a6a4b" stroke-width="4" fill="none"/>
         <circle cx="100" cy="110" r="10" fill="#ffb2d6"/>
@@ -185,25 +105,6 @@
         <circle cx="385" cy="159" r="6" fill="#def1ff"/>
         <circle cx="405" cy="159" r="6" fill="#def1ff"/>
       </g>
-      <g class="sway" opacity=".9">
-        <path d="M520 300 C530 235, 545 180, 555 145" stroke="#2a6a4b" stroke-width="4" fill="none"/>
-        <circle cx="555" cy="145" r="12" fill="#ffb2d6"/>
-        <circle cx="545" cy="154" r="6" fill="#ffcce5"/>
-        <circle cx="565" cy="154" r="6" fill="#ffcce5"/>
-      </g>
-      <g class="sway2" opacity=".85">
-        <path d="M680 300 C690 235, 705 180, 715 150" stroke="#2a6a4b" stroke-width="4" fill="none"/>
-        <circle cx="715" cy="150" r="10" fill="#ffd1a8"/>
-        <circle cx="707" cy="159" r="6" fill="#ffe0c5"/>
-        <circle cx="723" cy="159" r="6" fill="#ffe0c5"/>
-      </g>
-      <g class="sway3" opacity=".9">
-        <path d="M840 300 C850 240, 865 185, 875 160" stroke="#2a6a4b" stroke-width="4" fill="none"/>
-        <circle cx="875" cy="160" r="12" fill="#c7e6ff"/>
-        <circle cx="865" cy="169" r="6" fill="#def1ff"/>
-        <circle cx="885" cy="169" r="6" fill="#def1ff"/>
-      </g>
-      <!-- alçak çimen -->
       <rect x="0" y="260" width="1000" height="60" fill="url(#grass)"/>
       <defs>
         <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
@@ -213,97 +114,111 @@
       </defs>
     </svg>
   </div>
-  <div class="ground"></div>
 
 <script>
-/* ---------------- YILDIZLAR (performans dostu) ---------------- */
+/* ========= YILDIZLI ARKA PLAN ========= */
 const sky = document.getElementById('sky');
-let STAR_COUNT = 140;
-if (matchMedia('(max-width: 560px)').matches) STAR_COUNT = 90; // mobilde azalt
+const sctx = sky.getContext('2d',{alpha:true});
+let W = sky.width = innerWidth;
+let H = sky.height = innerHeight;
+let STAR_COUNT = matchMedia('(max-width:560px)').matches ? 100 : 180;
+let drift = 0; // evet’ten sonra biraz hızlanacak
 
-function makeStars(count=STAR_COUNT){
-  const vw = innerWidth, vh = innerHeight;
-  sky.innerHTML = '';
-  for(let i=0;i<count;i++){
-    const s = document.createElement('div');
-    s.className='star';
-    s.style.left = Math.random()*vw + 'px';
-    s.style.top  = Math.random()*vh + 'px';
-    s.style.animationDuration = (1.8 + Math.random()*2.2) + 's';
-    s.style.opacity = 0.25 + Math.random()*0.9;
-    sky.appendChild(s);
-  }
-}
-makeStars();
-
-function shootStar(){
-  // ara sıra kayan yıldız; mobilde frekans daha düşük
-  if (matchMedia('(max-width: 560px)').matches && Math.random()<0.6) return;
-  const s = document.createElement('div');
-  s.className='shoot';
-  const vw = innerWidth, vh = innerHeight;
-  s.style.left = (vw*0.75 + Math.random()*vw*0.2) + 'px';
-  s.style.top  = (vh*0.1 + Math.random()*vh*0.2) + 'px';
-  sky.appendChild(s);
-  setTimeout(()=>s.remove(), 1800);
-}
-// daha çok ama yumuşak kayan yıldız etkisi
-setInterval(()=>{ if(Math.random()<0.5) shootStar(); }, 1900);
-addEventListener('resize', ()=>makeStars());
-
-/* ---------------- BUTON AKIŞI ---------------- */
-const btnYes = document.getElementById('yes');
-const btnNo  = document.getElementById('no');
-const msg    = document.getElementById('msg');
-
-// 3.5sn sonra hayır kaybolsun, evet hafif büyüsün
-setTimeout(()=>{
-  btnNo.classList.add('vanish');
-  btnYes.classList.add('grow'); // hafif büyüme (ekranı kaplamaz)
-}, 3500);
-
-// Evet tıklanınca kutlama + mesaj
-btnYes.addEventListener('click', ()=>{
-  celebrate();
-  msg.textContent = "Teşekkür ederim, seni seviyorum 💖";
-});
-
-/* ---------------- HAFİF KONFETİ (mobil dostu) ---------------- */
-const canvas = document.getElementById('fx');
-const ctx = canvas.getContext('2d', { alpha: true });
-let W = canvas.width = innerWidth;
-let H = canvas.height = innerHeight;
-addEventListener('resize', ()=>{ W=canvas.width=innerWidth; H=canvas.height=innerHeight; });
-
-let parts = [];
-function celebrate(){
-  const colors = ['#ff9aa8','#ffd28a','#9ad0ff','#bda0ff','#8cf5c4','#fff57a'];
-  const base = matchMedia('(max-width: 560px)').matches ? 80 : 140; // mobilde azalt
-  for(let i=0;i<base;i++){
-    parts.push({
-      x: W/2, y: H*0.36,
-      vx: (Math.random()*2-1)*5.5,
-      vy: -Math.random()*7-6,
-      g: 0.22 + Math.random()*0.16,
-      size: 3 + Math.random()*4.5,
-      color: colors[Math.floor(Math.random()*colors.length)],
-      life: 110+Math.random()*60
+let stars = [];
+function initStars(){
+  stars = [];
+  for(let i=0;i<STAR_COUNT;i++){
+    stars.push({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: Math.random()*1.5 + 0.4,
+      s: Math.random()*0.4 + 0.1
     });
   }
 }
+initStars();
+
+function drawStars(){
+  sctx.clearRect(0,0,W,H);
+  sctx.fillStyle = '#ffffff';
+  for(const st of stars){
+    sctx.globalAlpha = 0.35 + Math.random()*0.65;
+    sctx.beginPath();
+    sctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
+    sctx.fill();
+    // yavaş akış + hafif drift
+    st.y += st.s + drift*0.25;
+    st.x -= (st.s*0.15) + drift*0.05;
+    if(st.y > H) st.y = 0;
+    if(st.x < 0) st.x = W;
+  }
+  sctx.globalAlpha = 1;
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+addEventListener('resize', ()=>{ W=sky.width=innerWidth; H=sky.height=innerHeight; initStars(); });
+
+/* ========= UI ========= */
+const yes = document.getElementById('yes');
+const no  = document.getElementById('no');
+const msg = document.getElementById('msg');
+
+no.addEventListener('click', ()=>{
+  msg.textContent = "Öyle bir seçenek yok maalesef 😅 diğer seçeneği değerlendirebilirsiniz.";
+  msg.classList.add('show');
+  setTimeout(()=>{ msg.classList.remove('show'); no.style.display='none'; }, 5000);
+});
+
+yes.addEventListener('click', ()=>{
+  drift = 0.8;                     // yıldız akışı biraz hızlansın
+  setTimeout(()=> drift = 0.4, 4000); // sonra sakinleşsin
+  msg.textContent = "Teşekkür ederim, seni seviyorum 💖";
+  msg.classList.add('show');
+  boom(W/2, H*0.4);                // havai fişek patlat
+  setTimeout(()=> boom(W*0.7, H*0.3), 600);
+  setTimeout(()=> boom(W*0.3, H*0.45), 1100);
+});
+
+/* ========= HAVAİ FİŞEK / KONFETİ ========= */
+const fx = document.getElementById('fx');
+const fctx = fx.getContext('2d',{alpha:true});
+let FW = fx.width = innerWidth;
+let FH = fx.height = innerHeight;
+addEventListener('resize', ()=>{ FW=fx.width=innerWidth; FH=fx.height=innerHeight; });
+
+let parts = [];
+function boom(x,y){
+  const colors = ['#ff9aa8','#ffd28a','#9ad0ff','#bda0ff','#8cf5c4','#fff57a'];
+  const n = matchMedia('(max-width:560px)').matches ? 90 : 160;
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2;
+    const sp = Math.random()*5 + 2.5;
+    parts.push({
+      x, y,
+      vx: Math.cos(a)*sp,
+      vy: Math.sin(a)*sp,
+      g: 0.18 + Math.random()*0.12,
+      s: 2 + Math.random()*3.5,
+      c: colors[(Math.random()*colors.length)|0],
+      life: 110 + Math.random()*60,
+      rot: Math.random()*6.28,
+      vr: (Math.random()-0.5)*0.2
+    });
+  }
+}
+
 function tick(){
-  ctx.clearRect(0,0,W,H);
+  fctx.clearRect(0,0,FW,FH);
   for(let i=parts.length-1;i>=0;i--){
     const p = parts[i];
     p.life--; if(p.life<=0){ parts.splice(i,1); continue; }
-    p.vy += p.g;
-    p.x += p.vx; p.y += p.vy;
-    ctx.save();
-    ctx.translate(p.x,p.y);
-    ctx.rotate((p.x+p.y)/60);
-    ctx.fillStyle = p.color;
-    ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size);
-    ctx.restore();
+    p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    fctx.save();
+    fctx.translate(p.x,p.y);
+    fctx.rotate(p.rot);
+    fctx.fillStyle = p.c;
+    fctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
+    fctx.restore();
   }
   requestAnimationFrame(tick);
 }
